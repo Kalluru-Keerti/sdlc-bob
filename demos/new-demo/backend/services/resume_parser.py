@@ -21,8 +21,8 @@ MIN_USEFUL_CHARS = 40
 
 # Image files (screenshots, photos) are not supported: mock mode cannot read them and
 # live mode is not a supported input path for this demo.
-IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
-IMAGE_MAGIC = (b"\x89PNG", b"\xff\xd8\xff", b"GIF87a", b"GIF89a")
+IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".tif", ".tiff", ".heic", ".heif", ".svg"}
+IMAGE_MAGIC = (b"\x89PNG", b"\xff\xd8\xff", b"GIF87a", b"GIF89a", b"II*\x00", b"MM\x00*")
 IMAGE_REJECTED_MESSAGE = "Image files (screenshots, photos) are not supported. Upload a PDF, DOCX or TXT file instead."
 
 
@@ -134,9 +134,10 @@ def _normalize(text: str) -> str:
 def _is_image(ext: str, data: bytes, content_type: str) -> bool:
     return (
         ext in IMAGE_EXTENSIONS
-        or content_type.startswith("image/")
+        or content_type.lower().startswith("image/")
         or data.startswith(IMAGE_MAGIC)
         or (data[:4] == b"RIFF" and data[8:12] == b"WEBP")
+        or (data[4:8] == b"ftyp" and data[8:12] in (b"heic", b"heix", b"mif1"))
     )
 
 
